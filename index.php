@@ -1,3 +1,12 @@
+<?php 
+session_start();
+require_once "database/connection.php";
+
+// Fetch the 3 most recent rooms from the database
+$sql = "SELECT * FROM rooms ORDER BY id DESC LIMIT 3";
+$result = $conn->query($sql);
+$recent_rooms = $result->fetch_all(MYSQLI_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,14 +51,14 @@
             margin-right: 15px;
         }
         .hero {
-            background-image: url('hero_image.jpg'); /* Replace with your hero image */
+            background-image: url('hero_image.jpg');
             background-size: cover;
             background-position: center;
             color: white;
             text-align: center;
             padding: 100px 20px;
             position: relative;
-            height: 400px; /* Adjust as needed */
+            height: 400px;
         }
         .hero::before {
             content: '';
@@ -87,12 +96,9 @@
             background-color: #0056b3;
         }
         .container {
-            flex: 1;
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         h2 {
             color: #007BFF;
@@ -150,6 +156,10 @@
             padding: 30px 10px;
             height: 80px;
         }
+        #username{
+            font-size: 150%;
+            margin-left: 50px;
+        }
     </style>
 </head>
 <body>
@@ -163,8 +173,17 @@
         <div>
             <a href="index.php">Home</a>
             <a href="rooms.php">Rooms</a>
+            <?php
+            if(isset($_SESSION['username'])){
+            ?>
+            <span id="username"><?php echo "Welcome ".$_SESSION['username']; ?></span>
+            <a href="logout.php">Logout</a>
+            <?php
+            }else{
+            ?>
             <a href="login.php">Login</a>
             <a href="register.php">Register</a>
+            <?php } ?>
         </div>
     </div>
 
@@ -179,26 +198,15 @@
 
     <!-- Main Content -->
     <div class="container">
-        <h2>Featured Rooms</h2>
         <div class="cards">
+            <?php foreach ($recent_rooms as $room): ?>
             <div class="card">
-                <img src="single_room.jpg" alt="Single Room">
-                <h3>Single Room</h3>
-                <p>Cozy and comfortable single room with all the amenities you need for a relaxing stay.</p>
-                <a href="book_room.php?room_id=101" class="button">Book Now</a>
+                <img src="assets/images/uploads/<?php echo $room['image']; ?>" alt="<?php echo $room['room_type']; ?>">
+                <h3><?php echo ucfirst($room['room_type']); ?> Room</h3>
+                <p><?php echo $room['description']; ?></p>
+                <a href="book_room.php?room_id=<?php echo $room['id']; ?>" class="button">Book Now</a>
             </div>
-            <div class="card">
-                <img src="double_room.jpg" alt="Double Room">
-                <h3>Double Room</h3>
-                <p>Spacious double room perfect for couples or small families.</p>
-                <a href="book_room.php?room_id=202" class="button">Book Now</a>
-            </div>
-            <div class="card">
-                <img src="suite.jpg" alt="Suite">
-                <h3>Suite</h3>
-                <p>Luxurious suite with premium amenities and stunning views.</p>
-                <a href="book_room.php?room_id=303" class="button">Book Now</a>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 

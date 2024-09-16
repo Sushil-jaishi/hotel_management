@@ -1,3 +1,32 @@
+<?php
+// book_room.php
+
+require_once 'database/connection.php';
+session_start();
+if (!isset($_SESSION['email'])) {
+    header("Location: login.php");
+    exit();
+}
+// Ensure a room ID is provided
+if (isset($_GET['room_id'])) {
+    
+
+
+$room_id = intval($_GET['room_id']);
+
+// Fetch room details from the database
+$sql = "SELECT * FROM rooms WHERE id = $room_id";
+$result = $conn->query($sql);
+$room = $result->fetch_assoc();
+// var_dump($room);
+// exit();
+
+if (!$room) {
+    die('Room not found.');
+}
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +72,7 @@
         }
         .container {
             flex: 1;
-            max-width: 1200px; /* Increased width */
+            max-width: 1200px;
             min-width: 600px;
             margin: 20px auto;
             padding: 20px;
@@ -57,7 +86,7 @@
         }
         form {
             width: 100%;
-            max-width: 800px; /* Increased width */
+            max-width: 800px;
             margin: 0 auto;
         }
         label {
@@ -93,6 +122,10 @@
             padding: 30px 10px;
             height: 80px;
         }
+        #username{
+            font-size: 150%;
+            margin-left: 50px;
+        }
     </style>
 </head>
 <body>
@@ -106,33 +139,41 @@
         <div>
             <a href="index.php">Home</a>
             <a href="rooms.php">Rooms</a>
+            <?php
+           
+            if(isset($_SESSION['username'])){
+            ?>
+            <span id="username"><?php echo "Welcome ".$_SESSION['username']; ?></span>
+            <a href="logout.php">Logout</a>
+            <?php
+            }else{
+            ?>
             <a href="login.php">Login</a>
             <a href="register.php">Register</a>
+            <?php } ?>
         </div>
     </div>
 
     <!-- Booking Form -->
     <div class="container">
         <h1>Book a Room</h1>
+        <h2><?php echo htmlspecialchars($room['room_type']); ?> - Room <?php echo htmlspecialchars($room['room_number']); ?></h2>
+        <p><?php echo htmlspecialchars($room['description']); ?></p>
+        <p><strong>Price:</strong> <?php echo htmlspecialchars(number_format($room['price'], 2)); ?></p>
+<br>
         <form action="process_booking.php" method="post">
-            <label for="name">Full Name:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="room">Select Room:</label>
-            <select id="room" name="room_id" required>
-                <option value="101">Room 101 - Single Room</option>
-                <option value="202">Room 202 - Double Room</option>
-                <option value="303">Room 303 - Suite</option>
-            </select>
+            <input type="hidden" name="room_id" value="<?php echo htmlspecialchars($room['id']); ?>">
 
             <label for="checkin">Check-in Date:</label>
             <input type="date" id="checkin" name="checkin" required>
 
             <label for="checkout">Check-out Date:</label>
             <input type="date" id="checkout" name="checkout" required>
+            <select id="payment-method" name="payment_method" required>
+                <option value="">Select Payment Method</option>
+                <option value="cash_payment">Cash Payment</option>
+                <option value="online_payment">Online Payment</option>
+            </select>
 
             <button type="submit" class="button">Book Now</button>
         </form>

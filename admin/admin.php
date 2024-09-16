@@ -1,4 +1,5 @@
 <?php
+require_once "../database/connection.php";
 
 session_start();
 if(!isset($_SESSION['email'])){
@@ -115,6 +116,7 @@ if(!isset($_SESSION['email'])){
         <div class="nav-menu">
             <a href="#add-room">Add Rooms</a>
             <a href="#manage-bookings">Manage Bookings</a>
+            <a href="total_checkouts.php">Total Checkouts</a>
             <a href="../logout.php">Logout</a>
         </div>
     </div>
@@ -150,6 +152,12 @@ if(!isset($_SESSION['email'])){
         </div>
 
         <!-- Manage Bookings Section -->
+         <?php 
+
+            $sql= "select * from rooms";
+            $result=$conn->query($sql);
+            $rooms = $result->fetch_all(MYSQLI_ASSOC);
+         ?>
         <div id="manage-bookings" class="main-content">
             <h2>Manage Bookings</h2>
             <table>
@@ -164,28 +172,22 @@ if(!isset($_SESSION['email'])){
                     </tr>
                 </thead>
                 <tbody>
+                    <?php
+                    for($i=0;$i<count($rooms);$i++){
+                        ?>
                     <tr>
-                        <td>1</td>
-                        <td>101</td>
-                        <td>John Doe</td>
-                        <td>2024-09-10</td>
-                        <td>2024-09-15</td>
+                        <td><?php echo $i+1; ?></td>
+                        <td><?php echo $rooms[$i]['room_number'] ?></td>
+                        <td><?php echo $rooms[$i]['room_type'] ?></td>
+                        <td><?php echo $rooms[$i]['price'] ?></td>
+                        <td><?php echo $rooms[$i]['description'] ?></td>
                         <td>
-                            <a href="#" class="button">Edit</a>
-                            <a href="#" class="button" style="background-color: #e74c3c;">Delete</a>
+                            <a href="edit_room.php?room_id=<?php echo $rooms[$i]['id']; ?>" class="button">Edit</a>
+                            <a href="process_delete_room.php?room_id=<?php echo $rooms[$i]['id']; ?>" class="button" style="background-color: #e74c3c;" onclick="return confirm('Are you sure you want to delete this room?')">Delete</a>
                         </td>
+
                     </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>202</td>
-                        <td>Jane Smith</td>
-                        <td>2024-09-12</td>
-                        <td>2024-09-18</td>
-                        <td>
-                            <a href="#" class="button">Edit</a>
-                            <a href="#" class="button" style="background-color: #e74c3c;">Delete</a>
-                        </td>
-                    </tr>
+                    <?php } ?>
                     <!-- Add more bookings as needed -->
                 </tbody>
             </table>
